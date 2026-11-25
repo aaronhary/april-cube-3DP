@@ -4,8 +4,8 @@ import(path : "onshape/std/geometry.fs", version : "2560.0");
 // AprilTag custom feature for Onshape.
 //
 // Creates a sketch containing the black cells of an AprilTag on a planar face
-// or construction plane. Each connected black area becomes one closed sketch
-// region, ready to extrude (emboss / deboss) or to split for multi-colour prints.
+// or construction plane. Every sketch region is a single colour (black areas and
+// the white islands they enclose); extrude only the black regions.
 //
 // When pasting into a new Feature Studio, keep the two header lines Onshape
 // generates (FeatureScript version + std import) and replace everything below.

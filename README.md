@@ -15,7 +15,7 @@ Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/
 | Rotation | Extra rotation about the face normal |
 | Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
 
-The sketch contains one closed region per connected black area. Extrude those regions to emboss or deboss the tag. For multi-colour printing, turn on the outer boundary so the white areas become regions as well.
+Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
 
 ## Files
 
