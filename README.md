@@ -58,7 +58,12 @@ The tag tiles are available as zip files on the **[latest release](https://githu
 | tag25h9 | 0 – 34 | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
 | tag16h5 | 0 – 29 | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
 
-**The cube** is in this repo: [`cube/cube.3mf`](cube/cube.3mf) for slicing, [`cube/cube.step`](cube/cube.step) for CAD.
+In this repo:
+
+| Folder | Contents |
+|---|---|
+| [`cube/`](cube/) | The cube: `cube.3mf` for slicing, `cube.step` for CAD |
+| [`tags/`](tags/) | The blank tile without a tag: `tile-blank.3mf` and `tile-blank.step` |
 
 Each tile file is **one object with two parts**:
 - `white`: the tile with the pocket.
@@ -135,13 +140,3 @@ It produces the same geometry as the tiles above, on any part you like.
 
 - **Cube and tile design:** [MADOS3D](https://www.mados3d.com/), CC0.
 - **AprilTag code tables:** [AprilRobotics/apriltag](https://github.com/AprilRobotics/apriltag), © The Regents of the University of Michigan, BSD 2-Clause.
-
-<details>
-<summary>Maintainer notes</summary>
-
-- [`tools/generate_families.py`](tools/generate_families.py) regenerates the tag tables in `AprilTag.fs` from the official `tagXXX.c` sources.
-- [`tools/verify_tags.py`](tools/verify_tags.py) checks the tag rendering against the official tag images.
-- [`tools/onshape_push.py`](tools/onshape_push.py) uploads the feature and its [icon](icon/AprilTag.svg) to a Feature Studio via the Onshape API, with keys in `.env` (see `.env.example`).
-- [`tools/make_icon.py`](tools/make_icon.py) builds the feature icon.
-
-</details>

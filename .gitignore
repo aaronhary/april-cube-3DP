@@ -1,7 +1,5 @@
 .env
-__pycache__/
-*.pyc
-tag_src/
-tag_imgs/
 .venv/
 local/
+__pycache__/
+*.pyc
