@@ -1,0 +1,45 @@
+# april-cube-3DP
+
+Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/software/apriltag) on any planar face or plane, ready to emboss/deboss or split for multi-colour 3D printing.
+
+## Feature: `AprilTag`
+
+| Input | Meaning |
+|---|---|
+| Face or plane | Planar face or construction plane. The tag reads correctly when viewed from outside the face. |
+| Family | `tag36h11` (default), `tag25h9`, `tag16h5`, `tagStandard41h12` |
+| Tag ID | 0 … (codes in family − 1) |
+| Tag size | Edge length of the black border square (the standard AprilTag "tag size") |
+| Center point | Optional vertex / mate connector; default is the face centroid |
+| Align to edge | Optional linear edge defining the tag's x-axis |
+| Rotation | Extra rotation about the face normal |
+| Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
+
+The sketch contains one closed region per connected black area. Extrude those regions to emboss or deboss the tag. For multi-colour printing, turn on the outer boundary so the white areas become regions as well.
+
+## Files
+
+- [featurescript/AprilTag.fs](featurescript/AprilTag.fs): the Feature Studio source
+- [tools/generate_families.py](tools/generate_families.py): regenerates the code tables from the official `tagXXX.c` sources
+- [tools/verify_tags.py](tools/verify_tags.py): checks the rendering and sketch logic against the official tag PNGs
+- [tools/onshape_push.py](tools/onshape_push.py): uploads the feature to Onshape through the REST API
+
+## Getting it into Onshape
+
+**Manually:** create a Feature Studio in your document, keep the two header lines Onshape generates, and paste everything after them from `AprilTag.fs`.
+
+**With the API:**
+1. Create API keys at <https://dev-portal.onshape.com/keys>.
+2. `cp .env.example .env` and fill in the keys plus the Feature Studio URL.
+3. Run `python tools/onshape_push.py`.
+
+## Regenerating / verifying the tag data
+
+```sh
+# sources: https://github.com/AprilRobotics/apriltag  (tag36h11.c, tag25h9.c, tag16h5.c, tagStandard41h12.c)
+python tools/generate_families.py tag_src/
+# images:  https://github.com/AprilRobotics/apriltag-imgs  saved as <family>__<id>.png
+python tools/verify_tags.py tag_imgs/
+```
+
+Tag data © The Regents of the University of Michigan, BSD 2-Clause.
