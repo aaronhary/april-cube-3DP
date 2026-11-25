@@ -14,9 +14,10 @@ Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/
 | Align to edge | Optional linear edge defining the tag's x-axis |
 | Rotation | Extra rotation about the face normal |
 | Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
-| Corner chamfer | Default 0.2 mm. Where two black cells touch only at a corner, their corners are cut back by this length. Without it, those touch points can't be extruded as valid solids (EXTRUDE_FAILED). 0 turns it off. Must be smaller than half a cell. |
+| Corner chamfer | Default 0.2 mm. Where two black cells touch only at a corner, the two white corners there are cut back by this length. The black cells connect through a small diamond and stay one piece, so both colours extrude to valid solids. 0 turns it off. Must be smaller than half a cell. |
+| Inlay | On by default. Cuts the black area *Inlay depth* (default 0.4 mm) into the part that owns the face, and fills the pocket with a new part named "AprilTag <id> black" with black appearance. The result is the original part plus a flush black part, ready for two-colour printing. Needs a part face, not a construction plane. Warns if the tag sticks out of the part. |
 
-Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
+With Inlay turned off, the feature only creates the sketch. Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
 
 ### Detector tag size
 
@@ -36,11 +37,12 @@ Example: a 4 cm tag36h11 has a detector tag size of 3.2 cm.
 - [featurescript/AprilTag.fs](featurescript/AprilTag.fs): the Feature Studio source
 - [tools/generate_families.py](tools/generate_families.py): regenerates the code tables from the official `tagXXX.c` sources
 - [tools/verify_tags.py](tools/verify_tags.py): checks the rendering and sketch logic against the official tag PNGs
-- [tools/onshape_push.py](tools/onshape_push.py): uploads the feature to Onshape through the REST API
+- [tools/onshape_push.py](tools/onshape_push.py): uploads the feature to Onshape through the REST API, together with the toolbar icon
+- [icon/AprilTag.svg](icon/AprilTag.svg): the feature icon (tag36h11 ID 0)
 
 ## Getting it into Onshape
 
-**Manually:** create a Feature Studio in your document, keep the two header lines Onshape generates, and paste everything after them from `AprilTag.fs`.
+**Manually:** create a Feature Studio in your document, keep the two header lines Onshape generates, and paste everything after them from `AprilTag.fs`. Pasting it this way gives no icon: to add one, import `icon/AprilTag.svg` into the document and add `"Icon" : icon::BLOB_DATA` to the feature annotation.
 
 **With the API:**
 1. Create API keys at <https://dev-portal.onshape.com/keys>.

@@ -41,6 +41,14 @@ const TAG_CHAMFER_BOUNDS =
     (inch) : 0.008
 } as LengthBoundSpec;
 
+const TAG_DEPTH_BOUNDS =
+{
+    (meter) : [1e-5, 4e-4, 1],
+    (centimeter) : 0.04,
+    (millimeter) : 0.4,
+    (inch) : 0.016
+} as LengthBoundSpec;
+
 const TAG_ROTATION_BOUNDS =
 {
     (degree) : [-360, 0, 360],
@@ -49,7 +57,7 @@ const TAG_ROTATION_BOUNDS =
 
 annotation { "Feature Type Name" : "AprilTag",
         "Feature Name Template" : "AprilTag #tagId",
-        "Feature Type Description" : "Sketch an AprilTag on a planar face or plane." }
+        "Feature Type Description" : "Sketch an AprilTag on a planar face; optionally inlay it as a separate black part." }
 export const aprilTag = defineFeature(function(context is Context, id is Id, definition is map)
     precondition
     {
@@ -81,6 +89,15 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
 
         annotation { "Name" : "Corner chamfer (where cells touch diagonally)" }
         isLength(definition.chamfer, TAG_CHAMFER_BOUNDS);
+
+        annotation { "Name" : "Inlay: cut black area + create black part", "Default" : true }
+        definition.inlay is boolean;
+
+        if (definition.inlay)
+        {
+            annotation { "Name" : "Inlay depth" }
+            isLength(definition.depth, TAG_DEPTH_BOUNDS);
+        }
     }
     {
         const fam = APRILTAG_FAMILIES[definition.family];
@@ -115,7 +132,72 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
                     });
         }
         skSolve(sketch);
+
+        if (definition.inlay)
+        {
+            createInlay(context, id, definition, sketchPlane, img, fam.totalWidth, cell);
+        }
     });
+
+/**
+ * Cuts the black regions `depth` deep into the part that owns the selected
+ * face and fills the pocket with a new black part of the same shape.
+ */
+function createInlay(context is Context, id is Id, definition is map, sketchPlane is Plane, img is array, n is number, cell is ValueWithUnits)
+{
+    const target = qBodyType(qOwnerBody(definition.location), BodyType.SOLID);
+    if (isQueryEmpty(context, target))
+    {
+        throw regenError("Inlay needs a face of a part. Select a part face or turn off Inlay.", ["location", "inlay"]);
+    }
+
+    // Black sketch regions = regions containing a black cell centre
+    const regions = qCreatedBy(id + "sketch", EntityType.FACE);
+    const yDir = cross(sketchPlane.normal, sketchPlane.x);
+    const half = n / 2;
+    var blackQueries = [];
+    for (var row = 0; row < n; row += 1)
+    {
+        for (var col = 0; col < n; col += 1)
+        {
+            if (!img[row][col])
+            {
+                const p = sketchPlane.origin + (sketchPlane.x * (col + 0.5 - half) + yDir * (half - row - 0.5)) * cell;
+                blackQueries = append(blackQueries, qContainsPoint(regions, p));
+            }
+        }
+    }
+    const blackRegions = qUnion(blackQueries);
+
+    // Tool bodies: black area extruded into the part
+    opExtrude(context, id + "inlayBody", {
+                "entities" : blackRegions,
+                "direction" : -sketchPlane.normal,
+                "endBound" : BoundingType.BLIND,
+                "endDepth" : definition.depth
+            });
+    const blackBodies = qCreatedBy(id + "inlayBody", EntityType.BODY);
+
+    // Pocket in the original part; the tool bodies stay as the black part
+    const volumeBefore = evVolume(context, { "entities" : target });
+    opBoolean(context, id + "inlayCut", {
+                "tools" : blackBodies,
+                "targets" : target,
+                "operationType" : BooleanOperationType.SUBTRACTION,
+                "keepTools" : true
+            });
+    const removed = volumeBefore - evVolume(context, { "entities" : target });
+    if (evVolume(context, { "entities" : blackBodies }) > removed * 1.001)
+    {
+        reportFeatureWarning(context, id, "The tag sticks out of the part: it is larger than the face or the part is thinner than the inlay depth.");
+    }
+
+    setProperty(context, { "entities" : blackBodies, "propertyType" : PropertyType.APPEARANCE, "value" : color(0.05, 0.05, 0.05) });
+    setProperty(context, { "entities" : blackBodies, "propertyType" : PropertyType.NAME, "value" : "AprilTag " ~ definition.tagId ~ " black" });
+
+    // The sketch has been used up; remove it so it does not clutter the view
+    opDeleteBodies(context, id + "deleteSketch", { "entities" : qCreatedBy(id + "sketch", EntityType.BODY) });
+}
 
 /**
  * Sketch plane centred on the tag. Normal = outward face normal, so the tag
@@ -225,9 +307,10 @@ function diagonalContact(img is array, n is number, x is number, y is number) re
  * [x0, y0, x1, y1] (x right, y down, 0..n). Each segment separates a black
  * cell from a non-black one, so every sketch region is a single colour.
  *
- * Where two black cells touch only diagonally, their corners are chamfered by
- * c (grid units): the black cells separate and the white cells connect through
- * a small diamond, so both colours extrude to valid (manifold) solids.
+ * Where two black cells touch only diagonally, the two white corners at that
+ * point are chamfered by c (grid units): the black cells connect through a
+ * small diamond and the white cells separate, so both colours extrude to valid
+ * (manifold) solids and the black area stays one piece.
  */
 function boundarySegments(img is array, n is number, outerBoundary is boolean, c is number) returns array
 {
@@ -272,7 +355,7 @@ function boundarySegments(img is array, n is number, outerBoundary is boolean, c
             }
         }
     }
-    // Chamfer lines cutting the black corners at diagonal contacts
+    // Chamfer lines cutting the white corners at diagonal contacts
     if (c > 0)
     {
         for (var y = 1; y < n; y += 1)
@@ -280,15 +363,15 @@ function boundarySegments(img is array, n is number, outerBoundary is boolean, c
             for (var x = 1; x < n; x += 1)
             {
                 const contact = diagonalContact(img, n, x, y);
-                if (contact == 1) // black top-left + bottom-right
-                {
-                    segments = append(segments, [x - c, y, x, y - c]);
-                    segments = append(segments, [x + c, y, x, y + c]);
-                }
-                else if (contact == 2) // black top-right + bottom-left
+                if (contact == 1) // black top-left + bottom-right -> cut white top-right + bottom-left
                 {
                     segments = append(segments, [x + c, y, x, y - c]);
                     segments = append(segments, [x - c, y, x, y + c]);
+                }
+                else if (contact == 2) // black top-right + bottom-left -> cut white top-left + bottom-right
+                {
+                    segments = append(segments, [x - c, y, x, y - c]);
+                    segments = append(segments, [x + c, y, x, y + c]);
                 }
             }
         }
