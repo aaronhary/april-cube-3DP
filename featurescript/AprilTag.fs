@@ -54,7 +54,7 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
         annotation { "Name" : "Tag ID" }
         isInteger(definition.tagId, TAG_ID_BOUNDS);
 
-        annotation { "Name" : "Tag size (outer edge of black border)" }
+        annotation { "Name" : "Tag size (overall, incl. white border)" }
         isLength(definition.size, TAG_SIZE_BOUNDS);
 
         annotation { "Name" : "Center point (default: face center)",
@@ -85,7 +85,8 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
 
         const sketchPlane = computeTagPlane(context, definition);
         const img = renderTag(fam, fam.codes[definition.tagId]);
-        const cell = definition.size / fam.widthAtBorder;
+        // Size = overall tag edge (full totalWidth x totalWidth grid, like the official PNGs)
+        const cell = definition.size / fam.totalWidth;
 
         const sketch = newSketchOnPlane(context, id + "sketch", { "sketchPlane" : sketchPlane });
         const segments = boundarySegments(img, fam.totalWidth, definition.outerBoundary);

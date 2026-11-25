@@ -9,13 +9,26 @@ Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/
 | Face or plane | Planar face or construction plane. The tag reads correctly when viewed from outside the face. |
 | Family | `tag36h11` (default), `tag25h9`, `tag16h5`, `tagStandard41h12` |
 | Tag ID | 0 … (codes in family − 1) |
-| Tag size | Edge length of the black border square (the standard AprilTag "tag size") |
+| Tag size | Overall edge length of the whole tag, including the white border: 4 cm gives a 4 × 4 cm tag. Note that detectors such as OpenCV and ROS expect the *black-border* size for pose estimation; see below. |
 | Center point | Optional vertex / mate connector; default is the face centroid |
 | Align to edge | Optional linear edge defining the tag's x-axis |
 | Rotation | Extra rotation about the face normal |
 | Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
 
 Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
+
+### Detector tag size
+
+Pose estimation needs the edge length of the black border square, not the overall size:
+
+| Family | Grid (overall) | Black border | Detector tag size |
+|---|---|---|---|
+| tag36h11 | 10 × 10 | 8 | overall × 8/10 |
+| tag25h9 | 9 × 9 | 7 | overall × 7/9 |
+| tag16h5 | 8 × 8 | 6 | overall × 6/8 |
+| tagStandard41h12 | 9 × 9 | 5 | overall × 5/9 |
+
+Example: a 4 cm tag36h11 has a detector tag size of 3.2 cm.
 
 ## Files
 
