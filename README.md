@@ -14,6 +14,7 @@ Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/
 | Align to edge | Optional linear edge defining the tag's x-axis |
 | Rotation | Extra rotation about the face normal |
 | Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
+| Corner chamfer | Default 0.2 mm. Where two black cells touch only at a corner, their corners are cut back by this length. Without it, those touch points can't be extruded as valid solids (EXTRUDE_FAILED). 0 turns it off. Must be smaller than half a cell. |
 
 Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
 

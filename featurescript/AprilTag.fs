@@ -33,6 +33,14 @@ const TAG_SIZE_BOUNDS =
     (inch) : 2
 } as LengthBoundSpec;
 
+const TAG_CHAMFER_BOUNDS =
+{
+    (meter) : [0, 2e-4, 1],
+    (centimeter) : 0.02,
+    (millimeter) : 0.2,
+    (inch) : 0.008
+} as LengthBoundSpec;
+
 const TAG_ROTATION_BOUNDS =
 {
     (degree) : [-360, 0, 360],
@@ -70,6 +78,9 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
 
         annotation { "Name" : "Draw outer boundary (incl. white quiet zone)", "Default" : false }
         definition.outerBoundary is boolean;
+
+        annotation { "Name" : "Corner chamfer (where cells touch diagonally)" }
+        isLength(definition.chamfer, TAG_CHAMFER_BOUNDS);
     }
     {
         const fam = APRILTAG_FAMILIES[definition.family];
@@ -87,9 +98,13 @@ export const aprilTag = defineFeature(function(context is Context, id is Id, def
         const img = renderTag(fam, fam.codes[definition.tagId]);
         // Size = overall tag edge (full totalWidth x totalWidth grid, like the official PNGs)
         const cell = definition.size / fam.totalWidth;
+        if (definition.chamfer >= cell / 2)
+        {
+            throw regenError("Corner chamfer must be smaller than half a cell (" ~ toString(roundToPrecision(cell / 2 / millimeter, 3)) ~ " mm).", ["chamfer"]);
+        }
 
         const sketch = newSketchOnPlane(context, id + "sketch", { "sketchPlane" : sketchPlane });
-        const segments = boundarySegments(img, fam.totalWidth, definition.outerBoundary);
+        const segments = boundarySegments(img, fam.totalWidth, definition.outerBoundary, definition.chamfer / cell);
         const half = fam.totalWidth / 2;
         for (var i = 0; i < size(segments); i += 1)
         {
@@ -188,56 +203,93 @@ function isBlack(img is array, n is number, row is number, col is number) return
 }
 
 /**
+ * Diagonal contact at grid vertex (x, y): 1 = top-left and bottom-right cells
+ * are black (others not), 2 = top-right and bottom-left are black, 0 = none.
+ * At such a vertex both colours touch only in a point (non-manifold).
+ */
+function diagonalContact(img is array, n is number, x is number, y is number) returns number
+{
+    const tl = isBlack(img, n, y - 1, x - 1);
+    const tr = isBlack(img, n, y - 1, x);
+    const bl = isBlack(img, n, y, x - 1);
+    const br = isBlack(img, n, y, x);
+    if (tl && br && !tr && !bl)
+        return 1;
+    if (tr && bl && !tl && !br)
+        return 2;
+    return 0;
+}
+
+/**
  * Outline of all black cells as merged straight segments in grid coordinates
  * [x0, y0, x1, y1] (x right, y down, 0..n). Each segment separates a black
- * cell from a non-black one, so the sketch regions equal the black areas.
+ * cell from a non-black one, so every sketch region is a single colour.
+ *
+ * Where two black cells touch only diagonally, their corners are chamfered by
+ * c (grid units): the black cells separate and the white cells connect through
+ * a small diamond, so both colours extrude to valid (manifold) solids.
  */
-function boundarySegments(img is array, n is number, outerBoundary is boolean) returns array
+function boundarySegments(img is array, n is number, outerBoundary is boolean, c is number) returns array
 {
     var segments = [];
     // Horizontal grid lines y = 0..n
     for (var y = 0; y <= n; y += 1)
     {
-        var runStart = -1;
+        var runStart = undefined;
         for (var x = 0; x <= n; x += 1)
         {
-            var edge = false;
-            if (x < n)
+            const corner = diagonalContact(img, n, x, y) != 0;
+            const edge = x < n && (isBlack(img, n, y - 1, x) != isBlack(img, n, y, x) ||
+                        (outerBoundary && (y == 0 || y == n)));
+            if (runStart != undefined && (!edge || corner))
             {
-                edge = isBlack(img, n, y - 1, x) != isBlack(img, n, y, x) ||
-                    (outerBoundary && (y == 0 || y == n));
+                segments = append(segments, [runStart, y, x - (corner ? c : 0), y]);
+                runStart = undefined;
             }
-            if (edge && runStart < 0)
+            if (edge && runStart == undefined)
             {
-                runStart = x;
-            }
-            else if (!edge && runStart >= 0)
-            {
-                segments = append(segments, [runStart, y, x, y]);
-                runStart = -1;
+                runStart = x + (corner ? c : 0);
             }
         }
     }
     // Vertical grid lines x = 0..n
     for (var x = 0; x <= n; x += 1)
     {
-        var runStart = -1;
+        var runStart = undefined;
         for (var y = 0; y <= n; y += 1)
         {
-            var edge = false;
-            if (y < n)
+            const corner = diagonalContact(img, n, x, y) != 0;
+            const edge = y < n && (isBlack(img, n, y, x - 1) != isBlack(img, n, y, x) ||
+                        (outerBoundary && (x == 0 || x == n)));
+            if (runStart != undefined && (!edge || corner))
             {
-                edge = isBlack(img, n, y, x - 1) != isBlack(img, n, y, x) ||
-                    (outerBoundary && (x == 0 || x == n));
+                segments = append(segments, [x, runStart, x, y - (corner ? c : 0)]);
+                runStart = undefined;
             }
-            if (edge && runStart < 0)
+            if (edge && runStart == undefined)
             {
-                runStart = y;
+                runStart = y + (corner ? c : 0);
             }
-            else if (!edge && runStart >= 0)
+        }
+    }
+    // Chamfer lines cutting the black corners at diagonal contacts
+    if (c > 0)
+    {
+        for (var y = 1; y < n; y += 1)
+        {
+            for (var x = 1; x < n; x += 1)
             {
-                segments = append(segments, [x, runStart, x, y]);
-                runStart = -1;
+                const contact = diagonalContact(img, n, x, y);
+                if (contact == 1) // black top-left + bottom-right
+                {
+                    segments = append(segments, [x - c, y, x, y - c]);
+                    segments = append(segments, [x + c, y, x, y + c]);
+                }
+                else if (contact == 2) // black top-right + bottom-left
+                {
+                    segments = append(segments, [x + c, y, x, y - c]);
+                    segments = append(segments, [x - c, y, x, y + c]);
+                }
             }
         }
     }
