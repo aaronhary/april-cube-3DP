@@ -1,61 +1,99 @@
-# april-cube-3DP
+# April Cube
 
-Onshape custom feature that sketches an [AprilTag](https://april.eecs.umich.edu/software/apriltag) on any planar face or plane, ready to emboss/deboss or split for multi-colour 3D printing.
+A 3D-printable [AprilTag](https://april.eecs.umich.edu/software/apriltag) cube for camera-based pose tracking. A 40 mm cube skeleton carries six flat tag tiles, one per face. Each tile is a 42.4 × 42.4 × 6.8 mm plate with the tag inlaid 0.4 mm deep in two colours.
 
-## Feature: `AprilTag`
+This repo contains every tag of the three classic AprilTag families as ready-to-print two-colour tiles (652 files), the cube skeleton, and an Onshape custom feature to make your own.
+
+## Why this project exists
+
+> **1. Flat printing: only 2 colour changes per tile.**
+> Every tag tile prints flat, with the tag in the print plane, so the colour changes only in the thin inlay layers. With 0.2 mm layers the 0.4 mm inlay is two layers: about **two filament changes per tile**. A cube with tags on its side walls would need a colour change on almost every layer.
+>
+> **2. Maximum flexibility.**
+> Tags and cube are separate parts. Pick any family and any ID for each face, swap a tile without reprinting the cube, and reuse the skeleton. If the ready-made tiles don't fit your needs, the Onshape feature puts any tag on any flat face, at any size.
+
+## What's in the repo
+
+```
+tags/
+  tag36h11/tag36h11_00000.3mf … tag36h11_00586.3mf   587 tiles
+  tag25h9/ tag25h9_00000.3mf  … tag25h9_00034.3mf     35 tiles
+  tag16h5/ tag16h5_00000.3mf  … tag16h5_00029.3mf     30 tiles
+skeleton/
+  april-cube-skeleton.3mf      cube skeleton, ready to slice
+  april-cube-skeleton.step     cube skeleton for CAD
+featurescript/AprilTag.fs      Onshape custom feature (source)
+```
+
+Every tag file is **one object made of two parts**, `white` (the tile with the pocket) and `black` (the inlay). Your slicer loads it as one object; assign a filament to each part. The file names use the tag family and the ID, zero-padded to five digits like the official [apriltag-imgs](https://github.com/AprilRobotics/apriltag-imgs).
+
+## Printing
+
+1. Open a tag file, e.g. `tags/tag36h11/tag36h11_00000.3mf`, in Bambu Studio, OrcaSlicer, PrusaSlicer or Cura.
+2. Assign white (or any light colour) to the `white` part and black to `black`.
+3. Print it as it lies, tag facing up, at 0.2 mm layer height.
+4. Print `skeleton/april-cube-skeleton.3mf` in any colour and mount six tiles.
+
+Tips:
+- **Unique IDs:** use a different ID on every face, and on every cube if you track several, so the detector can tell faces apart.
+- **Matte filament** reduces glare and improves detection.
+
+## Choosing a tag family
+
+| Family | IDs | Cells (overall) | Notes |
+|---|---|---|---|
+| **tag36h11** | 0–586 | 10 × 10 | Recommended: robust, widely supported (OpenCV, ROS, FRC) |
+| tag25h9 | 0–34 | 9 × 9 | Bigger cells, fewer IDs |
+| tag16h5 | 0–29 | 8 × 8 | Biggest cells, but many false detections |
+
+### Tag size for your detector
+
+The tags are 40 mm overall, including the white border. Pose estimation (OpenCV, ROS apriltag, …) expects the edge length of the black border square:
+
+| Family | Detector tag size |
+|---|---|
+| tag36h11 | **32.0 mm** |
+| tag25h9 | **31.1 mm** |
+| tag16h5 | **30.0 mm** |
+
+## Onshape custom feature
+
+[`featurescript/AprilTag.fs`](featurescript/AprilTag.fs) adds an **AprilTag** feature to Onshape. Pick a flat face, a family and an ID, and the feature does the rest:
+- It cuts the tag 0.4 mm into the part.
+- It fills the pocket with a separate black part.
+
+This is the same geometry as the tiles in this repo.
 
 | Input | Meaning |
 |---|---|
-| Face or plane | Planar face or construction plane. The tag reads correctly when viewed from outside the face. |
+| Face or plane | Planar part face (or a plane, for a sketch only). The tag reads correctly when viewed from outside. |
 | Family | `tag36h11` (default), `tag25h9`, `tag16h5`, `tagStandard41h12` |
-| Tag ID | 0 … (codes in family − 1) |
-| Tag size | Overall edge length of the whole tag, including the white border: 4 cm gives a 4 × 4 cm tag. Note that detectors such as OpenCV and ROS expect the *black-border* size for pose estimation; see below. |
-| Center point | Optional vertex / mate connector; default is the face centroid |
-| Align to edge | Optional linear edge defining the tag's x-axis |
-| Rotation | Extra rotation about the face normal |
-| Draw outer boundary | Adds the full-tag square (incl. white quiet zone) so white areas become regions too |
-| Corner chamfer | Default 0.2 mm. Where two black cells touch only at a corner, the two white corners there are cut back by this length. The black cells connect through a small diamond and stay one piece, so both colours extrude to valid solids. 0 turns it off. Must be smaller than half a cell. |
-| Inlay | On by default. Cuts the black area *Inlay depth* (default 0.4 mm) into the part that owns the face, and fills the pocket with a new part named "AprilTag <id> black" with black appearance. The result is the original part plus a flush black part, ready for two-colour printing. Needs a part face, not a construction plane. Warns if the tag sticks out of the part. |
+| Tag ID | 0 … (number of tags in the family − 1) |
+| Tag size | Overall edge length including the white border: 4 cm gives a 4 × 4 cm tag |
+| Center point | Optional vertex or mate connector; default is the face centre |
+| Align to edge / Rotation | Orientation of the tag on the face |
+| Draw outer boundary | Also outlines the white border, for sketch-only use |
+| Corner chamfer | 0.2 mm by default. Where black cells touch only diagonally, the white corners are cut back, so the black stays one solid piece and both colours are valid solids |
+| Inlay / Inlay depth | On by default, 0.4 mm. Cuts the black area into the part and creates the black part. Off: sketch only |
 
-With Inlay turned off, the feature only creates the sketch. Every sketch region is a single colour, but white islands enclosed by black also become regions. When extruding, select only the black regions; selecting the whole sketch fills the white holes. With the outer boundary turned on, the white quiet zone becomes a region as well, which helps for multi-colour printing.
+**Installing it:**
+1. Create a Feature Studio in your Onshape document.
+2. Keep the two header lines Onshape generates.
+3. Paste everything after the header lines from `AprilTag.fs`.
 
-### Detector tag size
+The feature then appears in the toolbar of that document.
 
-Pose estimation needs the edge length of the black border square, not the overall size:
+## Credits and licenses
 
-| Family | Grid (overall) | Black border | Detector tag size |
-|---|---|---|---|
-| tag36h11 | 10 × 10 | 8 | overall × 8/10 |
-| tag25h9 | 9 × 9 | 7 | overall × 7/9 |
-| tag16h5 | 8 × 8 | 6 | overall × 6/8 |
-| tagStandard41h12 | 9 × 9 | 5 | overall × 5/9 |
+- **Cube skeleton and tile:** based on the designs by **[MADOS3D](https://www.mados3d.com/)**, released under CC0. Thank you!
+- **AprilTag code tables:** from [AprilRobotics/apriltag](https://github.com/AprilRobotics/apriltag), © The Regents of the University of Michigan, BSD 2-Clause.
 
-Example: a 4 cm tag36h11 has a detector tag size of 3.2 cm.
+<details>
+<summary>Maintainer notes</summary>
 
-## Files
+- [`tools/generate_families.py`](tools/generate_families.py) regenerates the tag tables in `AprilTag.fs` from the official `tagXXX.c` sources.
+- [`tools/verify_tags.py`](tools/verify_tags.py) checks the tag rendering against the official tag images.
+- [`tools/onshape_push.py`](tools/onshape_push.py) uploads the feature and its [icon](icon/AprilTag.svg) to a Feature Studio via the Onshape API, with keys in `.env` (see `.env.example`).
+- [`tools/make_icon.py`](tools/make_icon.py) builds the feature icon.
 
-- [featurescript/AprilTag.fs](featurescript/AprilTag.fs): the Feature Studio source
-- [tools/generate_families.py](tools/generate_families.py): regenerates the code tables from the official `tagXXX.c` sources
-- [tools/verify_tags.py](tools/verify_tags.py): checks the rendering and sketch logic against the official tag PNGs
-- [tools/onshape_push.py](tools/onshape_push.py): uploads the feature to Onshape through the REST API, together with the toolbar icon
-- [icon/AprilTag.svg](icon/AprilTag.svg): the feature icon (tag16h5 ID 4), generated by [tools/make_icon.py](tools/make_icon.py). `onshape_push.py` replaces the icon in Onshape whenever this file changes.
-
-## Getting it into Onshape
-
-**Manually:** create a Feature Studio in your document, keep the two header lines Onshape generates, and paste everything after them from `AprilTag.fs`. Pasting it this way gives no icon: to add one, import `icon/AprilTag.svg` into the document and add `"Icon" : icon::BLOB_DATA` to the feature annotation.
-
-**With the API:**
-1. Create API keys at <https://dev-portal.onshape.com/keys>.
-2. `cp .env.example .env` and fill in the keys plus the Feature Studio URL.
-3. Run `python tools/onshape_push.py`.
-
-## Regenerating / verifying the tag data
-
-```sh
-# sources: https://github.com/AprilRobotics/apriltag  (tag36h11.c, tag25h9.c, tag16h5.c, tagStandard41h12.c)
-python tools/generate_families.py tag_src/
-# images:  https://github.com/AprilRobotics/apriltag-imgs  saved as <family>__<id>.png
-python tools/verify_tags.py tag_imgs/
-```
-
-Tag data © The Regents of the University of Michigan, BSD 2-Clause.
+</details>
