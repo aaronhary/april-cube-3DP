@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/header.jpg" width="100%" alt="Printed April Cube 3DP: an assembled cube with AprilTag tiles, the cube with one tile showing its clips, and a loose tag tile">
+<img src="docs/april-cube-3dp.png" width="620" alt="April Cube 3DP: a cube with AprilTag tiles and two loose flat tiles">
 
 # April Cube 3DP
 
@@ -136,6 +136,14 @@ It produces the same tag geometry as the tiles above (without the engraved numbe
 | Inlay / Inlay depth | On by default, 0.2 mm (one layer). Cuts the black area into the part and creates the black part. Off: sketch only |
 
 </details>
+
+---
+
+## 📸 Printed example
+
+<img src="docs/header.jpg" width="100%" alt="Printed April Cube 3DP: an assembled cube with AprilTag tiles, the cube with one tile showing its clips, and a loose tag tile">
+
+An assembled April Cube 3DP. Behind it is the black cube with one tile turned over to show its clips, and a loose tile lies in front.
 
 ---
 
