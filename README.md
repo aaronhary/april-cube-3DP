@@ -158,7 +158,11 @@ An assembled April Cube 3DP. Behind it is the black cube with one tile turned ov
 
 ---
 
-## 📄 Licenses
+## 📄 License
 
+**[CC0 1.0](LICENSE)**: public domain. Print, share, modify and sell it, no attribution required.
+
+Third-party parts keep their own licenses. Details are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md):
 - **Cube and tile design:** [MADOS3D](https://www.mados3d.com/), CC0.
 - **AprilTag code tables:** [AprilRobotics/apriltag](https://github.com/AprilRobotics/apriltag), © The Regents of the University of Michigan, BSD 2-Clause.
+- **Engraved ID numbers:** glyph outlines of Roboto Mono, SIL Open Font License 1.1.
