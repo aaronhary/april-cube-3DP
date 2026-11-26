@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/april-cube-3dp.png" width="620" alt="April Cube 3DP: a cube with AprilTag tiles and two loose flat tiles">
+<img src="docs/header.jpg" width="100%" alt="Printed April Cube 3DP: an assembled cube with AprilTag tiles, the cube with one tile showing its clips, and a loose tag tile">
 
 # April Cube 3DP
 
