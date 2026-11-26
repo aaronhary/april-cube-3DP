@@ -41,12 +41,13 @@ const TAG_CHAMFER_BOUNDS =
     (inch) : 0.008
 } as LengthBoundSpec;
 
+// Default inlay depth = one 0.2 mm print layer
 const TAG_DEPTH_BOUNDS =
 {
-    (meter) : [1e-5, 4e-4, 1],
-    (centimeter) : 0.04,
-    (millimeter) : 0.4,
-    (inch) : 0.016
+    (meter) : [1e-5, 2e-4, 1],
+    (centimeter) : 0.02,
+    (millimeter) : 0.2,
+    (inch) : 0.008
 } as LengthBoundSpec;
 
 const TAG_ROTATION_BOUNDS =
