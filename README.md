@@ -25,7 +25,7 @@
 
 ### 🖨️ Flat printing: only 1 colour change
 
-Every tag tile prints **flat**, tag face down on the bed. The tag is a single 0.2 mm layer, the very first one, so the colour changes only there: **two filament changes per tile**, plus a perfectly flat tag surface from the bed. A cube with tags on its side walls would need a colour change on almost every layer.
+Every tag tile prints **flat**, tag face down on the bed. The tag is a single 0.2 mm layer, the very first one, so the colour changes only there: **one filament change per tile**, plus a perfectly flat tag surface from the bed. A cube with tags on its side walls would need a colour change on almost every layer.
 
 </td>
 <td width="50%" valign="top">
@@ -50,13 +50,24 @@ Need something custom? The **Onshape feature** puts any tag on any flat face, at
 
 ## 📦 Downloads
 
-The tag tiles are on the **[latest release](https://github.com/aaronhary/april-cube-3DP/releases/latest)**, one zip per family. Each zip holds ready-to-print **plates of 16 tiles**: IDs 0–15, 16–31, and so on.
+The tag tiles are on the **[latest release](https://github.com/aaronhary/april-cube-3DP/releases/latest)**, one zip per family. Each zip holds ready-to-print **plates of 16 tiles** (IDs 0–15, 16–31, …) and **STL files** for each tile.
 
-| Family | IDs | Plates | Download |
-|---|---|---|---|
-| **tag36h11** ⭐ | 0 – 586 | 37 | [april-cube-3dp_tag36h11_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag36h11_tiles.zip) |
-| tag25h9 | 0 – 34 | 3 | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
-| tag16h5 | 0 – 29 | 2 | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
+| Family | IDs | Plates | STLs | Download |
+|---|---|---|---|---|
+| **tag36h11** ⭐ | 0 – 586 | 37 | IDs 0 – 63 | [april-cube-3dp_tag36h11_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag36h11_tiles.zip) |
+| tag25h9 | 0 – 34 | 3 | all | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
+| tag16h5 | 0 – 29 | 2 | all | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
+
+Inside each zip:
+
+```
+tag36h11/
+  3mf-plates/tag36h11_00000-00015.3mf          Bambu Studio plate, 16 tiles
+  stl/tag36h11_00000/tag36h11_00000_black.stl  tag inlay
+  stl/tag36h11_00000/tag36h11_00000_white.stl  tile with engraved ID
+```
+
+**STLs**, for any slicer: import the `black` and `white` STL of a tag **together**, as one object with two parts. They share the same coordinates, so the tag lands exactly in its pocket.
 
 Every plate is a **Bambu Studio project** (`.3mf`): 0.2 mm Standard, Bambu PLA Basic, filament 1 black and filament 2 white.
 - **Layout:** the tiles sit in a 4 × 4 grid, row by row from the back left: ID 0 at the back left, ID 15 at the front right. The grid is 194 × 194 mm.
@@ -70,7 +81,7 @@ In this repo:
 | Folder | Contents |
 |---|---|
 | [`cube/`](cube/) | The cube: `cube.3mf` for slicing, `cube.step` for CAD |
-| [`tags/`](tags/) | The blank tile without a tag: `tile-blank.3mf` and `tile-blank.step` |
+| [`tiles/`](tiles/) | The blank tile without a tag: `tile-blank.3mf` and `tile-blank.step` |
 
 | | |
 |---|---|
