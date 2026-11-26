@@ -23,7 +23,7 @@
 <tr>
 <td width="50%" valign="top">
 
-### 🖨️ Flat printing: only 2 colour changes
+### 🖨️ Flat printing: only 1 colour change
 
 Every tag tile prints **flat**, tag face down on the bed. The tag is a single 0.2 mm layer, the very first one, so the colour changes only there: **two filament changes per tile**, plus a perfectly flat tag surface from the bed. A cube with tags on its side walls would need a colour change on almost every layer.
 
@@ -58,7 +58,7 @@ The tag tiles are on the **[latest release](https://github.com/aaronhary/april-c
 | tag25h9 | 0 – 34 | 3 | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
 | tag16h5 | 0 – 29 | 2 | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
 
-Every plate is a **Bambu Studio project** (`.3mf`) set up for the **Bambu Lab A1**: 0.2 mm Standard, Bambu PLA Basic, filament 1 black and filament 2 white.
+Every plate is a **Bambu Studio project** (`.3mf`): 0.2 mm Standard, Bambu PLA Basic, filament 1 black and filament 2 white.
 - **Layout:** the tiles sit in a 4 × 4 grid, row by row from the back left: ID 0 at the back left, ID 15 at the front right. The grid is 194 × 194 mm.
 - **File names:** each plate is named after its first and last ID, e.g. `tag36h11_00016-00031.3mf`. The last plate of a family holds the remaining IDs.
 - **Tiles:** each tile is one object with two parts:
