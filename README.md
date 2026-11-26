@@ -50,13 +50,20 @@ Need something custom? The **Onshape feature** puts any tag on any flat face, at
 
 ## 📦 Downloads
 
-The tag tiles are available as zip files on the **[latest release](https://github.com/aaronhary/april-cube-3DP/releases/latest)**: one zip per family, one `.3mf` per tag ID.
+The tag tiles are on the **[latest release](https://github.com/aaronhary/april-cube-3DP/releases/latest)**, one zip per family. Each zip holds ready-to-print **plates of 16 tiles**: IDs 0–15, 16–31, and so on.
 
-| Family | IDs | Download |
-|---|---|---|
-| **tag36h11** ⭐ | 0 – 586 | [april-cube-3dp_tag36h11_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag36h11_tiles.zip) |
-| tag25h9 | 0 – 34 | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
-| tag16h5 | 0 – 29 | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
+| Family | IDs | Plates | Download |
+|---|---|---|---|
+| **tag36h11** ⭐ | 0 – 586 | 37 | [april-cube-3dp_tag36h11_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag36h11_tiles.zip) |
+| tag25h9 | 0 – 34 | 3 | [april-cube-3dp_tag25h9_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag25h9_tiles.zip) |
+| tag16h5 | 0 – 29 | 2 | [april-cube-3dp_tag16h5_tiles.zip](https://github.com/aaronhary/april-cube-3DP/releases/latest/download/april-cube-3dp_tag16h5_tiles.zip) |
+
+Every plate is a **Bambu Studio project** (`.3mf`) set up for the **Bambu Lab A1**: 0.2 mm Standard, Bambu PLA Basic, filament 1 black and filament 2 white.
+- **Layout:** the tiles sit in a 4 × 4 grid, row by row from the back left: ID 0 at the back left, ID 15 at the front right. The grid is 194 × 194 mm.
+- **File names:** each plate is named after its first and last ID, e.g. `tag36h11_00016-00031.3mf`. The last plate of a family holds the remaining IDs.
+- **Tiles:** each tile is one object with two parts:
+  - `black`: the tag, a single 0.2 mm layer on the **underside**.
+  - `white`: the tile, with the **ID number engraved** 0.2 mm into its upper side, so you can tell the tiles apart.
 
 In this repo:
 
@@ -65,28 +72,24 @@ In this repo:
 | [`cube/`](cube/) | The cube: `cube.3mf` for slicing, `cube.step` for CAD |
 | [`tags/`](tags/) | The blank tile without a tag: `tile-blank.3mf` and `tile-blank.step` |
 
-Each tile file is **one object with two parts**:
-- `white`: the tile with the pocket.
-- `black`: the tag inlay.
-
-The files are named like the official [apriltag-imgs](https://github.com/AprilRobotics/apriltag-imgs), e.g. `tag36h11_00042.3mf` for ID 42.
-
 | | |
 |---|---|
 | Tile | 44 × 44 × 6.8 mm |
 | Tag | 40 mm overall, inlaid 0.2 mm (one layer) on the underside |
+| ID number | Engraved 0.2 mm into the upper side |
 | Cube | 40 mm |
 
 ---
 
 ## 🖨️ Printing
 
-1. Open a tile, e.g. `tag36h11_00000.3mf`, in your slicer: Bambu Studio, OrcaSlicer, PrusaSlicer, …
-2. Assign **white** to the `white` part and **black** to the `black` part.
-3. Print it as it lies, **tag face down** on the bed, at **0.2 mm** layer height. The first layer is the tag.
+1. Open a plate, e.g. `tag36h11_00000-00015.3mf`, in **Bambu Studio** (OrcaSlicer works too).
+2. Check the filaments: **filament 1 black**, **filament 2 white**.
+3. Print it as it is. The tags lie **face down** on the bed, so the whole plate changes colour only in its first layer.
 4. Print `cube.3mf` in any colour and mount six tiles.
 
 > [!TIP]
+> - **Other printers:** switch the printer profile in Bambu Studio. The plate needs a 256 × 256 mm bed; for smaller beds, move tiles to a second plate.
 > - Use a **different ID on every face**, and on every cube if you track several, so each face can be identified.
 > - **Matte filament** reduces glare and improves detection.
 
@@ -110,7 +113,7 @@ The files are named like the official [apriltag-imgs](https://github.com/AprilRo
 - Pick a flat face, a family and an ID.
 - The feature cuts the tag into the part and fills the pocket with a separate black part.
 
-It produces the same geometry as the tiles above, on any part you like.
+It produces the same tag geometry as the tiles above (without the engraved number), on any part you like.
 
 **Install:**
 1. Create a Feature Studio in your Onshape document.
